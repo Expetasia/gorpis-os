@@ -49,7 +49,7 @@ export default function ExpensePanel() {
         value={nama}
         onChange={(e) => setNama(e.target.value)}
         placeholder="Contoh: Minyak"
-        className="mt-6 w-full rounded-xl border border-gray-300 p-3"
+        className="mt-6 w-full rounded-xl border border-gray-300 bg-white p-3 text-black placeholder:text-gray-400"
       />
 
       <input
@@ -57,7 +57,7 @@ export default function ExpensePanel() {
         value={nominal}
         onChange={(e) => setNominal(e.target.value)}
         placeholder="Nominal"
-        className="mt-3 w-full rounded-xl border border-gray-300 p-3"
+        className="mt-3 w-full rounded-xl border border-gray-300 bg-white p-3 text-black placeholder:text-gray-400"
       />
 
       <button
