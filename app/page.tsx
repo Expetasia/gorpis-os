@@ -1,25 +1,53 @@
+"use client";
+
+import { useEffect } from "react";
+
+import Header from "@/components/layout/Header";
+import AppLayout from "@/components/layout/AppLayout";
+import SalesSession from "@/components/layout/SalesSession";
+import PageWrapper from "@/components/layout/PageWrapper";
+
+import DashboardCard from "@/components/DashboardCard";
+import POS from "@/components/kasir/POS";
+import TransactionHistory from "@/components/TransactionHistory";
+
+import { useSalesStore } from "@/store/useSalesStore";
+
 export default function Home() {
+  const loadData = useSalesStore((state) => state.loadData);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   return (
-    <main className="min-h-screen bg-orange-50 flex items-center justify-center">
-      <div className="text-center">
+    <main className="min-h-screen bg-orange-50">
 
-        <h1 className="text-5xl font-bold text-orange-600">
-          🍌 GORPIS OS
-        </h1>
+      <Header />
 
-        <p className="mt-4 text-gray-600 text-xl">
-          Business Operating System
-        </p>
+      <AppLayout>
 
-        <p className="mt-2 text-gray-400">
-          Version 1.0
-        </p>
+        <PageWrapper
+          title="🏠 Dashboard"
+          subtitle="Ringkasan operasional GORPIS hari ini."
+        >
 
-        <button className="mt-10 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold transition">
-          Mulai
-        </button>
+          <SalesSession />
 
-      </div>
+          <DashboardCard />
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+
+            <POS />
+
+            <TransactionHistory />
+
+          </div>
+
+        </PageWrapper>
+
+      </AppLayout>
+
     </main>
   );
 }
