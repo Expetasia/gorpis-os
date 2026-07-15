@@ -1,35 +1,40 @@
 "use client";
 
+import Header from "@/components/layout/Header";
+import AppLayout from "@/components/layout/AppLayout";
+import PageWrapper from "@/components/layout/PageWrapper";
+import SalesSession from "@/components/layout/SalesSession";
 import POS from "@/components/kasir/POS";
 import TransactionHistory from "@/components/TransactionHistory";
 
 export default function KasirPage() {
   return (
-    <main className="min-h-screen bg-orange-50 p-6">
+    <main className="min-h-screen bg-orange-50">
 
-      <div className="max-w-7xl mx-auto">
+      <Header />
 
-        <div className="mb-6">
+      <AppLayout>
 
-          <h1 className="text-4xl font-extrabold text-zinc-900">
-            🍌 Kasir
-          </h1>
+        <PageWrapper
+          title="🍌 Kasir"
+          subtitle="Catat penjualan dengan cepat dan akurat."
+        >
 
-          <p className="text-zinc-600 mt-1">
-            Catat penjualan dengan cepat
-          </p>
+          
+          
+          
 
-        </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-        <div className="grid xl:grid-cols-2 gap-6">
+            <POS />
 
-          <POS />
+            <TransactionHistory />
 
-          <TransactionHistory />
+          </div>
 
-        </div>
+        </PageWrapper>
 
-      </div>
+      </AppLayout>
 
     </main>
   );

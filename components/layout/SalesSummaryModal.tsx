@@ -1,3 +1,5 @@
+import { formatRupiah } from "@/lib/formatRupiah";
+
 type SalesSummaryModalProps = {
   open: boolean;
   onClose: () => void;
@@ -7,69 +9,117 @@ type SalesSummaryModalProps = {
   transaksi: number;
 };
 
-import { formatRupiah } from "@/lib/formatRupiah";
-
 export default function SalesSummaryModal({
   open,
   onClose,
-  omzet,
+ omzet,
   cash,
   qris,
   transaksi,
 }: SalesSummaryModalProps) {
   if (!open) return null;
 
+  const sekarang = new Date();
+
+  const tanggal = sekarang.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const jam = sekarang.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl">
 
-        <h2 className="text-3xl font-extrabold text-zinc-900">
-          📊 Ringkasan Hari Ini
-        </h2>
+        <div className="rounded-t-3xl bg-orange-500 p-6 text-white">
 
-        <div className="mt-6 space-y-4">
+          <h2 className="text-3xl font-extrabold">
+            📊 Penutupan Hari Operasional
+          </h2>
 
-          <div className="flex justify-between">
-            <span className="text-gray-500">Omzet</span>
-            <span className="font-bold text-orange-600">
-              {formatRupiah(omzet)}
-            </span>
-          </div>
+          <p className="mt-2 opacity-90">
+            {tanggal}
+          </p>
 
-          <div className="flex justify-between">
-            <span className="text-gray-500">Cash</span>
-            <span className="font-bold">
-              {formatRupiah(cash)}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-gray-500">QRIS</span>
-            <span className="font-bold">
-              {formatRupiah(qris)}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-gray-500">
-              Jumlah Transaksi
-            </span>
-            <span className="font-bold">
-              {transaksi}
-            </span>
-          </div>
+          <p className="opacity-90">
+            Ditutup pukul {jam}
+          </p>
 
         </div>
 
-        <button
-          onClick={onClose}
-          className="mt-8 w-full rounded-xl bg-orange-500 py-3 font-bold text-white hover:bg-orange-600"
-        >
-          Tutup
-        </button>
+        <div className="space-y-4 p-6">
+
+          <Item
+            title="💰 Omzet"
+            value={formatRupiah(omzet)}
+            color="text-orange-600"
+          />
+
+          <Item
+            title="💵 Cash"
+            value={formatRupiah(cash)}
+            color="text-green-600"
+          />
+
+          <Item
+            title="📱 QRIS"
+            value={formatRupiah(qris)}
+            color="text-blue-600"
+          />
+
+          <Item
+            title="🧾 Total Transaksi"
+            value={String(transaksi)}
+            color="text-zinc-900"
+          />
+
+        </div>
+
+        <div className="border-t p-6">
+
+          <button
+            onClick={onClose}
+            className="w-full rounded-xl bg-orange-500 py-4 text-lg font-bold text-white transition hover:bg-orange-600"
+          >
+            Selesai
+          </button>
+
+        </div>
 
       </div>
+
+    </div>
+  );
+}
+
+type ItemProps = {
+  title: string;
+  value: string;
+  color: string;
+};
+
+function Item({
+  title,
+  value,
+  color,
+}: ItemProps) {
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4">
+
+      <span className="font-medium text-gray-600">
+        {title}
+      </span>
+
+      <span className={`text-xl font-extrabold ${color}`}>
+        {value}
+      </span>
 
     </div>
   );

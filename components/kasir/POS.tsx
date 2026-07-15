@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import MenuCard from "./MenuCard";
 
 import { menus } from "@/components/menu";
-import { useSalesStore } from "@/store/useSalesStore";
+import { useSalesStore } from "@/store/useGorpisStore";
 import { formatRupiah } from "@/lib/formatRupiah";
 
 export default function POS() {
@@ -13,26 +13,37 @@ export default function POS() {
     (state) => state.tambahPenjualan
   );
 
+  const sessionOpen = useSalesStore(
+    (state) => state.sessionOpen
+  );
+
   const [selectedMenu, setSelectedMenu] = useState(menus[0]);
   const [upsize, setUpsize] = useState(false);
+  const [qty, setQty] = useState(1);
   const [payment, setPayment] = useState<"Cash" | "QRIS">("Cash");
   const [saved, setSaved] = useState(false);
 
   const total = useMemo(() => {
-    return upsize
-      ? selectedMenu.harga + 5000
-      : selectedMenu.harga;
-  }, [selectedMenu, upsize]);
+  const hargaSatuan = upsize
+    ? selectedMenu.harga + 5000
+    : selectedMenu.harga;
+
+  return hargaSatuan * qty;
+}, [selectedMenu, upsize, qty]);
 
   function simpan() {
+    if (!sessionOpen) return;
+  
     tambahPenjualan(
-      selectedMenu.nama,
-      total,
-      payment,
-      upsize
-    );
+  selectedMenu.nama,
+  total,
+  payment,
+  upsize,
+  qty
+);
 
     setUpSize(false);
+    setQty(1);
     setPayment("Cash");
 
     setSaved(true);
@@ -90,6 +101,35 @@ export default function POS() {
       <div className="mt-8">
 
         <h3 className="text-xl font-bold text-zinc-900">
+          <div className="mt-8">
+
+  <h3 className="text-xl font-bold text-zinc-900">
+    Jumlah
+  </h3>
+
+  <div className="mt-3 flex items-center justify-center gap-6">
+
+    <button
+      onClick={() => setQty((q) => Math.max(1, q - 1))}
+      className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500 text-2xl font-bold text-white hover:bg-red-600"
+    >
+      −
+    </button>
+
+    <span className="text-3xl font-extrabold">
+      {qty}
+    </span>
+
+    <button
+      onClick={() => setQty((q) => q + 1)}
+      className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500 text-2xl font-bold text-white hover:bg-green-600"
+    >
+      +
+    </button>
+
+  </div>
+
+</div>
           Ukuran
         </h3>
 
@@ -164,14 +204,70 @@ export default function POS() {
         <h2 className="text-4xl font-extrabold text-zinc-900 mt-2">
           {formatRupiah(total)}
         </h2>
+        <h3 className="text-xl font-bold">
+  🛒 Preview Transaksi
+</h3>
+
+<div className="mt-5 space-y-3">
+
+  <div className="flex justify-between">
+
+    <span>Menu</span>
+
+    <span className="font-bold">
+  {selectedMenu.nama} x{qty}
+</span>
+
+  </div>
+
+  <div className="flex justify-between">
+
+    <span>Ukuran</span>
+
+    <span className="font-bold">
+      {upsize ? "Upsize (11 pcs)" : "Normal (7 pcs)"}
+    </span>
+
+  </div>
+
+  <div className="flex justify-between">
+
+    <span>Pembayaran</span>
+
+    <span className="font-bold">
+      {payment}
+    </span>
+
+  </div>
+
+  <hr />
+
+  <div className="flex justify-between">
+
+    <span className="font-bold">
+      Total
+    </span>
+
+    <span className="text-3xl font-extrabold text-orange-600">
+      {formatRupiah(total)}
+    </span>
+
+  </div>
+
+</div>
 
       </div>
 
       <button
         onClick={simpan}
-        className="mt-6 w-full rounded-xl bg-orange-500 hover:bg-orange-600 py-4 text-xl font-bold text-white transition"
+        disabled={!sessionOpen}
+        className={`mt-6 w-full rounded-xl py-4 text-xl font-bold text-white transition ${
+          sessionOpen
+            ? "bg-orange-500 hover:bg-orange-600"
+            : "cursor-not-allowed bg-gray-400"
+        }`}
       >
-        Catat Penjualan
+        {sessionOpen ? "Catat Penjualan" : "🔒 Mulai Jualan Dulu"}
       </button>
 
     </div>

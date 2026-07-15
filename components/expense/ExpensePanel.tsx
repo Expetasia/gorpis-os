@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useSalesStore } from "@/store/useSalesStore";
+import { useMemo, useState } from "react";
+import { useSalesStore } from "@/store/useGorpisStore";
 import { formatRupiah } from "@/lib/formatRupiah";
 
 export default function ExpensePanel() {
@@ -16,118 +16,141 @@ export default function ExpensePanel() {
   const [nama, setNama] = useState("");
   const [nominal, setNominal] = useState("");
 
+  const totalPengeluaran = useMemo(() => {
+    return expenses.reduce((a, b) => a + b.nominal, 0);
+  }, [expenses]);
+
   function simpan() {
-    if (!nama.trim()) return;
+    if (!nama.trim()) {
+      alert("Nama pengeluaran wajib diisi.");
+      return;
+    }
 
     const nilai = Number(nominal);
 
-    if (isNaN(nilai) || nilai <= 0) return;
+    if (isNaN(nilai) || nilai <= 0) {
+      alert("Nominal tidak valid.");
+      return;
+    }
 
-    tambahPengeluaran(nama, nilai);
+    tambahPengeluaran(nama.trim(), nilai);
 
     setNama("");
     setNominal("");
   }
 
-  const totalPengeluaran = expenses.reduce(
-    (total, item) => total + item.nominal,
-    0
-  );
-
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
 
-      <h2 className="text-3xl font-extrabold text-zinc-900">
-        💸 Pengeluaran
-      </h2>
+      <div className="flex items-center justify-between">
 
-      <p className="text-gray-500 mt-1">
-        Catat semua biaya operasional hari ini
-      </p>
+        <div>
 
-      <input
-        value={nama}
-        onChange={(e) => setNama(e.target.value)}
-        placeholder="Contoh: Minyak"
-        className="mt-6 w-full rounded-xl border border-gray-300 bg-white p-3 text-black placeholder:text-gray-400"
-      />
+          <h2 className="text-3xl font-extrabold text-zinc-900">
+            💸 Pengeluaran
+          </h2>
 
-      <input
-        type="number"
-        value={nominal}
-        onChange={(e) => setNominal(e.target.value)}
-        placeholder="Nominal"
-        className="mt-3 w-full rounded-xl border border-gray-300 bg-white p-3 text-black placeholder:text-gray-400"
-      />
+          <p className="mt-1 text-zinc-500">
+            Kelola biaya operasional harian
+          </p>
+
+        </div>
+
+        <div className="text-right">
+
+          <p className="text-sm text-zinc-500">
+            Total Hari Ini
+          </p>
+
+          <h2 className="text-2xl font-extrabold text-red-600">
+            {formatRupiah(totalPengeluaran)}
+          </h2>
+
+        </div>
+
+      </div>
+
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+
+        <input
+          value={nama}
+          onChange={(e) => setNama(e.target.value)}
+          placeholder="Nama pengeluaran"
+          className="rounded-xl border border-gray-300 p-3 outline-none focus:border-red-500"
+        />
+
+        <input
+          type="number"
+          value={nominal}
+          onChange={(e) => setNominal(e.target.value)}
+          placeholder="Nominal"
+          className="rounded-xl border border-gray-300 p-3 outline-none focus:border-red-500"
+        />
+
+      </div>
 
       <button
         onClick={simpan}
-        className="mt-4 w-full rounded-xl bg-red-500 hover:bg-red-600 py-3 font-bold text-white"
+        className="mt-5 w-full rounded-xl bg-red-500 py-3 text-lg font-bold text-white transition hover:bg-red-600"
       >
-        Tambah Pengeluaran
+        + Tambah Pengeluaran
       </button>
 
-      <div className="mt-8">
+      <div className="mt-8 space-y-3">
 
-        <div className="flex items-center justify-between mb-4">
+        {expenses.length === 0 && (
 
-          <h3 className="font-bold text-xl text-zinc-900">
-            Riwayat
-          </h3>
+          <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center text-zinc-500">
+            Belum ada pengeluaran hari ini.
+          </div>
 
-          <span className="font-bold text-red-600">
-            {formatRupiah(totalPengeluaran)}
-          </span>
+        )}
 
-        </div>
+        {expenses.map((item) => (
 
-        <div className="space-y-3">
+          <div
+            key={item.id}
+            className="flex items-center justify-between rounded-xl border border-gray-200 p-4"
+          >
 
-          {expenses.map((item) => (
+            <div>
 
-            <div
-              key={item.id}
-              className="rounded-xl border border-gray-200 p-4 flex items-center justify-between"
-            >
+              <h3 className="font-bold text-zinc-900">
+                {item.nama}
+              </h3>
 
-              <div>
-
-                <h4 className="font-bold text-zinc-900">
-                  {item.nama}
-                </h4>
-
-                <p className="text-gray-500 text-sm">
-                  {item.waktu}
-                </p>
-
-              </div>
-
-              <div className="text-right">
-
-                <p className="font-bold text-red-600">
-                  {formatRupiah(item.nominal)}
-                </p>
-
-                <button
-                  onClick={() => hapusPengeluaran(item.id)}
-                  className="mt-2 rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-700 hover:bg-red-200"
-                >
-                  Hapus
-                </button>
-
-              </div>
+              <p className="mt-1 text-sm text-zinc-500">
+                {item.waktu}
+              </p>
 
             </div>
 
-          ))}
+            <div className="text-right">
 
-          {expenses.length === 0 && (
-            <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-gray-500">
-              Belum ada pengeluaran.
+              <h3 className="font-bold text-red-600">
+                {formatRupiah(item.nominal)}
+              </h3>
+
+              <button
+                onClick={() => {
+                  if (
+                    confirm(
+                      "Hapus pengeluaran ini?"
+                    )
+                  ) {
+                    hapusPengeluaran(item.id);
+                  }
+                }}
+                className="mt-2 rounded-lg bg-red-100 px-3 py-1 text-sm font-bold text-red-700 transition hover:bg-red-200"
+              >
+                🗑 Hapus
+              </button>
+
             </div>
-          )}
 
-        </div>
+          </div>
+
+        ))}
 
       </div>
 

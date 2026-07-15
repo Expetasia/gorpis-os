@@ -2,71 +2,117 @@
 
 import { useMemo, useState } from "react";
 
-import { useSalesStore } from "@/store/useSalesStore";
+import { useSalesStore } from "@/store/useGorpisStore";
 import SalesSummaryModal from "./SalesSummaryModal";
 
 export default function SalesSession() {
-  const sales = useSalesStore((state) => state.sales);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  const [startTime, setStartTime] = useState("");
+  const sales = useSalesStore(
+    (state) => state.sales
+  );
+
+  const sessionOpen = useSalesStore(
+    (state) => state.sessionOpen
+  );
+
+  const sessionStart = useSalesStore(
+    (state) => state.sessionStart
+  );
+
+  const mulaiJualan = useSalesStore(
+    (state) => state.mulaiJualan
+  );
+
+  const tutupJualan = useSalesStore(
+    (state) => state.tutupJualan
+  );
+
+  const [showSummary, setShowSummary] =
+    useState(false);
+    const [summary, setSummary] = useState({
+      omzet: 0,
+      cash: 0,
+      qris: 0,
+      transaksi: 0,
+    });
 
   const omzet = useMemo(() => {
-    return sales.reduce((t, s) => t + s.harga, 0);
+    return sales.reduce(
+      (t, s) => t + s.harga,
+      0
+    );
   }, [sales]);
 
   const cash = useMemo(() => {
     return sales
-      .filter((s) => s.pembayaran === "Cash")
-      .reduce((t, s) => t + s.harga, 0);
+      .filter(
+        (s) => s.pembayaran === "Cash"
+      )
+      .reduce(
+        (t, s) => t + s.harga,
+        0
+      );
   }, [sales]);
 
   const qris = useMemo(() => {
     return sales
-      .filter((s) => s.pembayaran === "QRIS")
-      .reduce((t, s) => t + s.harga, 0);
+      .filter(
+        (s) => s.pembayaran === "QRIS"
+      )
+      .reduce(
+        (t, s) => t + s.harga,
+        0
+      );
   }, [sales]);
 
-  function mulaiJualan() {
-    setStartTime(
-      new Date().toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
+  function handleTutup() {
+    
+    console.log({
+      omzet,
+      cash,
+      qris,
+      transaksi: sales.length,
+    });
+    setSummary({
+      omzet,
+      cash,
+      qris,
+      transaksi: sales.length,
+    });
 
-    setIsOpen(true);
-  }
+    tutupJualan();
 
-  function tutupJualan() {
-    setIsOpen(false);
     setShowSummary(true);
-  }
+
+}
+  
 
   return (
     <>
-      {!isOpen ? (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6 mb-6">
+      {!sessionOpen ? (
+
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
 
           <h2 className="text-2xl font-extrabold text-zinc-900">
             🟢 Sesi Jualan
           </h2>
 
-          <p className="text-gray-500 mt-2">
+          <p className="mt-2 text-gray-500">
             Belum ada sesi aktif.
           </p>
 
           <button
             onClick={mulaiJualan}
-            className="mt-5 w-full rounded-xl bg-green-600 hover:bg-green-700 py-4 text-lg font-bold text-white"
+            className="mt-5 w-full rounded-xl bg-green-600 py-4 text-lg font-bold text-white hover:bg-green-700"
           >
             Mulai Jualan
           </button>
 
         </div>
+
       ) : (
-        <div className="bg-green-50 border-2 border-green-500 rounded-2xl shadow-md p-6 mb-6">
+
+        <div className="mb-6 rounded-2xl border-2 border-green-500 bg-green-50 p-6 shadow-md">
 
           <div className="flex items-center justify-between">
 
@@ -77,14 +123,14 @@ export default function SalesSession() {
               </h2>
 
               <p className="mt-1 text-green-700">
-                Mulai {startTime}
+                Mulai {sessionStart}
               </p>
 
             </div>
 
             <button
-              onClick={tutupJualan}
-              className="rounded-xl bg-red-600 hover:bg-red-700 px-6 py-3 font-bold text-white"
+              onClick={handleTutup}
+              className="rounded-xl bg-red-600 px-6 py-3 font-bold text-white hover:bg-red-700"
             >
               Tutup Jualan
             </button>
@@ -92,15 +138,14 @@ export default function SalesSession() {
           </div>
 
         </div>
-      )}
 
-      <SalesSummaryModal
+      )}      <SalesSummaryModal
         open={showSummary}
         onClose={() => setShowSummary(false)}
-        omzet={omzet}
-        cash={cash}
-        qris={qris}
-        transaksi={sales.length}
+        omzet={summary.omzet}
+        cash={summary.cash}
+        qris={summary.qris}
+        transaksi={summary.transaksi}
       />
     </>
   );
